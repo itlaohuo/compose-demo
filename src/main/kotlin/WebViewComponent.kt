@@ -17,6 +17,7 @@ import java.awt.BorderLayout
 import java.awt.Dimension
 
 @Composable
+@Preview
 fun WebViewComponent(url: String, windowPlacement: WindowPlacement) {
 
     var isLoading by remember { mutableStateOf(true) }

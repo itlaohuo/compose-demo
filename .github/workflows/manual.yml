@@ -1,6 +1,6 @@
 # This is a basic workflow that is manually triggered
 
-name: Manual workflow
+name: Manual  Build and Package Compose for Desktop Application
 
 # Controls when the action will run. Workflow runs when manually triggered using the UI
 # or API.
@@ -18,15 +18,63 @@ on:
         # The data type of the input
         type: string
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "greet"
-  greet:
-    # The type of runner that the job will run on
+  build:
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Runs a single command using the runners shell
-    - name: Send greeting
-      run: echo "Hello ${{ inputs.name }}"
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+
+      - name: Build and package
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: assembleRelease
+
+      - name: Package for Linux (arm64)
+        runs-on: ubuntu-latest-arm64
+        needs: build
+        steps:
+          - uses: actions/checkout@v3
+          - name: Set up JDK
+            uses: actions/setup-java@v3
+            with:
+              java-version: '17'
+          - name: Build for arm64
+#            run: ./gradlew assembleRelease -PnativeTargetPlatform=linuxArm64
+            run: ./gradlew packageDistributionForCurrentOS
+
+      - name: Package for Linux (amd64)
+        runs-on: ubuntu-latest
+        needs: build
+        steps:
+          - uses: actions/checkout@v3
+          - name: Set up JDK
+            uses: actions/setup-java@v3
+            with:
+              java-version: '17'
+          # Assuming your Gradle configuration is set up to build for amd64 by default
+          - name: Build for amd64
+            run: ./gradlew packageDistributionForCurrentOS
+
+      - name: Package for Windows (amd64)
+        runs-on: windows-latest
+        needs: build
+        steps:
+          - uses: actions/checkout@v3
+          - name: Set up JDK
+            uses: actions/setup-java@v3
+            with:
+              java-version: '17'
+          - name: Build for Windows
+#            run: ./gradlew assembleRelease -PnativeTargetPlatform=windowsX64
+            run: ./gradlew packageDistributionForCurrentOS
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: build/distributions

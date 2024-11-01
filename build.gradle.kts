@@ -62,6 +62,20 @@ compose.desktop {
             modules( "java.instrument", "java.net.http", "jdk.jfr", "jdk.jsobject", "jdk.unsupported", "jdk.unsupported.desktop", "jdk.xml.dom")
             packageName = "compose-demo"
             packageVersion = "1.0.0"
+
+            val iconsRoot = project.file("src/main/resources/")
+
+            linux {
+                iconFile.set(iconsRoot.resolve("icons8-64.png"))
+            }
+
+            windows {
+                iconFile.set(iconsRoot.resolve("icons8-64.ico"))
+            }
+
+//            macOS {
+//                iconFile.set(iconsRoot.resolve("icons8-64.ico"))
+//            }
         }
     }
 }

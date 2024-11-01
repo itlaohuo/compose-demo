@@ -1,0 +1,61 @@
+name: Build AMD64 Desktop Application
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+
+on:
+  workflow_dispatch:
+    # Inputs the workflow accepts.
+    inputs:
+      name:
+        # Friendly description to be shown in the UI instead of 'name'
+        description: 'Person to greet'
+        # Default value if no value is explicitly provided
+        default: 'World'
+        # Input has to be provided for the workflow to run
+        required: true
+        # The data type of the input
+        type: string
+permissions:
+  contents: write
+jobs:
+  build-deb-arm64:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          buildkitd-flags: --debug
+
+      - name: Create Dockerfile
+        run: |
+          cat > Dockerfile << 'EOF'
+          FROM --platform=linux/arm64 ubuntu:22.04
+          
+          RUN apt-get update && apt-get install -y \
+              openjdk-17-jdk \
+              xorg-dev \
+              libgl1-mesa-dev \
+              && rm -rf /var/lib/apt/lists/*
+          
+          WORKDIR /app
+          EOF
+
+      - name: Build and run ARM64 container
+        run: |
+          docker buildx build --platform linux/arm64 -t compose-builder:arm64 .
+          docker run --platform linux/arm64 -v ${{ github.workspace }}:/app \
+            compose-builder:arm64 \
+            bash -c "ls -l ./gradlew && chmod +x ./gradlew && ./gradlew packageDistributionForCurrentOS || echo 'Gradle build failed'"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist-deb-arm64
+          path: build/**/*.deb

@@ -50,10 +50,15 @@ jobs:
       - name: Build and run ARM64 container
         run: |
           docker buildx build --platform linux/arm64 --load -t compose-builder:arm64 .
-          docker run --platform linux/arm64 -v ${{ github.workspace }}:/app \
+          docker run --name compose-builder-container --platform linux/arm64 -v ${{ github.workspace }}:/app \
             compose-builder:arm64 \
             bash -c "ls -l ./gradlew && chmod +x ./gradlew && ./gradlew packageDistributionForCurrentOS || echo 'Gradle build failed'"
-
+      - name: Copy artifacts from container
+        run: |
+          # Copy the artifacts from the container
+          docker cp compose-builder-container:/app/build ./build
+          # Remove the container
+          docker rm compose-builder-container
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:

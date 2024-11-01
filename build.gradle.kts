@@ -35,7 +35,7 @@ dependencies {
     implementation("org.jetbrains.compose.material:material:1.6.0") // 请使
 }
 javafx {
-    version = "17.0.13"
+    version = "23.0.1"
     modules = listOf("javafx.controls", "javafx.web", "javafx.swing",  "javafx.graphics","javafx.fxml")
 //    The plugin will include JavaFX dependencies for the current platform. However, a different target platform can also be specified.
 //    Supported targets are:
@@ -50,7 +50,7 @@ javafx {
 //    configuration = "compileOnly"
 }
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "17"
+    kotlinOptions.jvmTarget = "21"
 }
 
 compose.desktop {

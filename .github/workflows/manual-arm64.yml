@@ -39,7 +39,7 @@ jobs:
           FROM ubuntu:22.04
           
           RUN apt-get update && apt-get install -y \
-              openjdk-17-jdk \
+              openjdk-21-jdk \
               xorg-dev \
               libgl1-mesa-dev \
               && rm -rf /var/lib/apt/lists/*

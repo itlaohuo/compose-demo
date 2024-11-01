@@ -49,7 +49,7 @@ jobs:
 
       - name: Build and run ARM64 container
         run: |
-          docker buildx build --platform linux/arm64 -t compose-builder:arm64 .
+          docker buildx build --platform linux/arm64 --load -t compose-builder:arm64 .
           docker run --platform linux/arm64 -v ${{ github.workspace }}:/app \
             compose-builder:arm64 \
             bash -c "ls -l ./gradlew && chmod +x ./gradlew && ./gradlew packageDistributionForCurrentOS || echo 'Gradle build failed'"

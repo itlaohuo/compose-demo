@@ -44,7 +44,7 @@ fun main() = application {
             Platform.exit()
             exitApplication()
         },
-        title = "Web App",
+        title = "保障辅助支持系统",
         state = windowState,
         undecorated = true
     ) {
@@ -57,7 +57,7 @@ fun main() = application {
                     contentColor = Color.White,
                 ) {
                     Spacer(Modifier.width(16.dp))
-                    Text("Web App", modifier = Modifier.weight(1f))
+                    Text("保障辅助支持系统", modifier = Modifier.weight(1f))
 
                     IconButton(onClick = {
                         windowState.isMinimized = !windowState.isMinimized
@@ -85,7 +85,7 @@ fun main() = application {
 
                 // WebView内容
                 Box(modifier = Modifier.weight(1f)) {
-                    WebViewComponent(url = "https://www.baidu.com",windowPlacement = windowState.placement)
+                    WebViewComponent(url = "http://127.0.0.1:8080/zb/#/login",windowPlacement = windowState.placement)
                 }
             }
         }

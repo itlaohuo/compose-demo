@@ -4,6 +4,7 @@ name: Manual  Build and Package Compose for Desktop Application
 
 # Controls when the action will run. Workflow runs when manually triggered using the UI
 # or API.
+
 on:
   workflow_dispatch:
     # Inputs the workflow accepts.
@@ -17,7 +18,8 @@ on:
         required: true
         # The data type of the input
         type: string
-
+permissions:
+  contents: write
 jobs:
   build-deb-arm64:
     runs-on: ubuntu-latest-arm64
@@ -39,8 +41,8 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: dist
-          path: build/distributions
+          name: dist-deb-arm64
+          path: build/main/deb
 
   build-deb-amd4:
     runs-on: ubuntu-latest
@@ -62,8 +64,8 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: dist
-          path: build/distributions
+          name: dist-deb-amd64
+          path: build/main/deb
 
   build-exe-amd4:
     runs-on: windows-latest
@@ -84,5 +86,5 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: dist
-          path: build/distributions
+          name: dist-exe
+          path: build/main/exe

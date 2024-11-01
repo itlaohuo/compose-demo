@@ -54,6 +54,15 @@ jobs:
             compose-builder:arm64 \
             bash -c "ls -l ./gradlew && chmod +x ./gradlew && ./gradlew packageDistributionForCurrentOS || echo 'Gradle build failed'"
 
+      - name: Copy artifacts from container
+        run: |
+            # Get the container ID
+            CONTAINER_ID=$(docker create --platform linux/arm64 compose-builder:arm64)
+            # Copy the artifacts from the container
+            docker cp $CONTAINER_ID:/app/build ./build
+            # Remove the container
+            docker rm $CONTAINER_ID
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:

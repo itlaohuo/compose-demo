@@ -30,12 +30,14 @@ jobs:
         with:
           java-version: '17'
 
-      - name: Build and package arm64
+      - name: setup-gradle
         uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: assembleRelease
+#        with:
+#          arguments: assembleRelease
       #          run: ./gradlew assembleRelease -PnativeTargetPlatform=linuxArm64
-      #          run: ./gradlew packageDistributionForCurrentOS
+
+      - name: build
+        run: ./gradlew packageDistributionForCurrentOS
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -53,12 +55,13 @@ jobs:
         with:
           java-version: '17'
 
-      - name: Build and package amd64
+      - name: setup-gradle
         uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: assembleRelease
+#        with:
+#          arguments: assembleRelease
       #   run: ./gradlew assembleRelease -PnativeTargetPlatform=linuxArm64
-      #           run: ./gradlew packageDistributionForCurrentOS
+      - name: build
+        run: ./gradlew packageDistributionForCurrentOS
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -73,10 +76,11 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '17'
-      - name: Build for Windows
+      - name: setup gradle
         uses: gradle/actions/setup-gradle@v3
         #            run: ./gradlew assembleRelease -PnativeTargetPlatform=windowsX64
-#        run: ./gradlew packageDistributionForCurrentOS
+      - name: build
+        run: ./gradlew packageDistributionForCurrentOS
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:

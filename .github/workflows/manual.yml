@@ -35,14 +35,15 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
       #        - name: Build with Gradle
       #          run: ./gradlew build
-
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
       - name: build
         run: ./gradlew packageDistributionForCurrentOS
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: dist-deb-arm64
-          path: build/main/deb
+          path: build/**/*.deb
 
   build-deb-amd4:
     runs-on: ubuntu-latest
@@ -59,13 +60,15 @@ jobs:
       #        - name: Build with Gradle
       #          run: ./gradlew build
       #
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
       - name: build
         run: ./gradlew packageDistributionForCurrentOS
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: dist-deb-amd64
-          path: build/main/deb
+          path: build/**/*.deb
 
   build-exe-amd4:
     runs-on: windows-latest
@@ -87,4 +90,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: dist-exe
-          path: build/main/exe
+          path: build/**/*.exe

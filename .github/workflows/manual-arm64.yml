@@ -1,4 +1,4 @@
-name: Build AMD64 Desktop Application
+name: Build ARM64 Desktop Application
 
 # Controls when the action will run. Workflow runs when manually triggered using the UI
 # or API.

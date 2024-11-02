@@ -10,46 +10,25 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
-import javafx.application.Platform
-import java.awt.*
 
 fun main() = application {
-
-//    Thread.setDefaultUncaughtExceptionHandler { _, e ->
-//        Dialog(Frame(), e.message ?: "Error").apply {
-//            layout = FlowLayout()
-//            val label = Label(e.stackTraceToString())
-//            println(e.stackTraceToString())
-////            var text = Text(e.stackTraceToString()).var
-//            add(label)
-//            val button = Button("OK").apply {
-//                addActionListener { dispose() }
-//            }
-//            add(button)
-//            setSize(1200,600)
-//            isVisible = true
-//        }
-//    }
-
-    // 初始化JavaFX
-    Platform.startup {}
-
+    val url = "https://www.baidu.com"
+    val title = "网易云音乐"
     val windowState = rememberWindowState(
         placement = WindowPlacement.Floating,
-        width = 800.dp,
-        height = 600.dp
+        width = 1200.dp,
+        height = 800.dp
     )
     Window(
         onCloseRequest = {
-            Platform.exit()
             exitApplication()
         },
-        title = "Web App",
+        title = title,
         state = windowState,
         undecorated = true
     ) {
-        window.minimumSize = Dimension(350, 600)
         MaterialTheme {
+
             Column(modifier = Modifier.fillMaxSize()) {
                 // 自定义标题栏
                 TopAppBar(
@@ -74,20 +53,21 @@ fun main() = application {
                     }) {
                         Text("□", color = Color.White)
                     }
-
                     IconButton(onClick = {
-                        Platform.exit()
                         exitApplication()
                     }) {
                         Text("×", color = Color.White)
                     }
                 }
 
-                // WebView内容
+                // W内容
                 Box(modifier = Modifier.weight(1f)) {
-                    WebViewComponent(url = "https://www.baidu.com",windowPlacement = windowState.placement)
+                    JCefBrowserComponent(url = url, windowPlacement = windowState.placement)
                 }
+
             }
         }
     }
 }
+
+

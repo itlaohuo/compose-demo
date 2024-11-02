@@ -1,57 +1,89 @@
+import org.gradle.internal.impldep.org.apache.sshd.common.util.OsUtils
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.de.undercouch.gradle.tasks.download.Download
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.panteleyev.jpackage.ImageType
-import org.panteleyev.jpackage.JPackageTask
+
 
 plugins {
     kotlin("jvm")
-    id("org.jetbrains.compose")
-    id("org.openjfx.javafxplugin") version "0.0.13"
-    id("org.panteleyev.jpackageplugin") version "1.6.0"
+    id("org.jetbrains.compose") version "1.6.0"
+    id("de.undercouch.download") version "4.1.1"
+//    id ("com.google.osdetector") version "1.7.3"
+//    application
 }
 
 group = "com.example"
 version = "1.0-SNAPSHOT"
 
+val libraryPath = "third_party/java-cef"
+val hostOs = System.getProperty("os.name")
+println(hostOs)
+val target = when {
+    hostOs == "Mac OS X" -> "macos"
+    hostOs == "Linux" -> "linux"
+    hostOs.startsWith("Win") -> "windows"
+    else -> throw Error("Unknown os $hostOs")
+}
+
+
+val cefDownloadZip = run {
+    val zipName = "jcef-runtime-$target.zip"
+    val zipFile = File("third_party/$zipName")
+
+    tasks.register("downloadCef", Download::class) {
+        onlyIf { !zipFile.exists() }
+        // https://github.com/jcefmaven/jcefbuild/releases/download/1.0.61/windows-amd64.tar.gz
+        src("https://bintray.com/jetbrains/skija/download_file?file_path=$zipName")
+        dest(zipFile)
+        onlyIfModified(true)
+    }.map { zipFile }
+}
+
+val cefUnZip = run {
+    val targetDir = File("third_party/java-cef").apply { mkdirs() }
+    tasks.register("unzipCef", Copy::class) {
+        from(cefDownloadZip.map { zipTree(it) })
+        into(targetDir)
+    }.map { targetDir }
+}
+
 
 repositories {
+    google()
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-    google()
-//    maven ("https://maven.aliyun.com/repository/jcenter")
-//    maven ("https://maven.aliyun.com/repository/google")
-//    maven ("https://maven.aliyun.com/repository/gradle-plugin")
-//    maven ("https://maven.aliyun.com/repository/public")
+    // temp
+    maven("https://packages.jetbrains.team/maven/p/ui/dev")
 }
 
 dependencies {
-    // Note, if you develop a library, you should use compose.desktop.common.
-    // compose.desktop.currentOs should be used in launcher-sourceSet
-    // (in a separate module for demo project and in testMain).
-    // With compose.desktop.common you will also lose @Preview functionality
+    // compose for desktop
     implementation(compose.desktop.currentOs)
-    implementation("org.jetbrains.compose.desktop:desktop:1.6.0") // 请使用最新版本
-    implementation("org.jetbrains.compose.ui:ui:1.6.0") // 请使用最新版本
-    implementation("org.jetbrains.compose.material:material:1.6.0") // 请使
+    implementation(compose.desktop.linux_arm64)
+    implementation(compose.desktop.linux_x64)
+    implementation(compose.desktop.windows_x64)
+//    implementation("org.jetbrains.compose.desktop:desktop:1.6.10")
+//    implementation("org.jetbrains.compose.ui:ui:1.6.11")
+//    implementation("org.jetbrains.compose.material:material:1.6.10")
+
+    // JCEF
+    implementation("me.friwi:jcefmaven:127.3.1")
+//    implementation("org.jetbrains.jcef:jcef-skiko:0.1")
 }
-javafx {
-    version = "23.0.1"
-    modules = listOf("javafx.controls", "javafx.web", "javafx.swing",  "javafx.graphics","javafx.fxml")
-//    The plugin will include JavaFX dependencies for the current platform. However, a different target platform can also be specified.
-//    Supported targets are:
-//
-//    linux
-//    linux-aarch64
-//    win or windows
-//    osx or mac or macos
-//    osx-aarch64 or mac-aarch64 or macos-aarch64 (support added in JavaFX 11.0.12 LTS and JavaFX 17 GA)
-    // JavaFX application require native binaries for each platform to run. By default, the plugin will include these binaries for the target platform.
-    // Native dependencies can be avoided by declaring the dependency configuration as compileOnly.
-//    configuration = "compileOnly"
+
+tasks.withType<KotlinCompile>().configureEach {
+    kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+    dependsOn(cefUnZip)
 }
+
+
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "21"
+    kotlinOptions.jvmTarget = "17"
 }
+
+
+
+
 
 compose.desktop {
     application {
@@ -59,12 +91,15 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Exe, TargetFormat.Deb)
 //            includeAllModules = true
-            modules( "java.instrument", "java.net.http", "jdk.jfr", "jdk.jsobject", "jdk.unsupported", "jdk.unsupported.desktop", "jdk.xml.dom")
+//             modules("java.instrument", "java.prefs", "java.sql", "jdk.unsupported")
+            modules("java.instrument", "java.prefs", "jdk.jfr", "jdk.unsupported", "me.friwi:jcefmaven")
             packageName = "compose-demo"
             packageVersion = "1.0.0"
 
             val iconsRoot = project.file("src/main/resources/")
-
+            jvmArgs += listOf(
+                "-Djava.library.path=$libraryPath"
+            )
             linux {
                 iconFile.set(iconsRoot.resolve("icons8-64.png"))
             }
@@ -73,9 +108,9 @@ compose.desktop {
                 iconFile.set(iconsRoot.resolve("icons8-64.ico"))
             }
 
-//            macOS {
-//                iconFile.set(iconsRoot.resolve("icons8-64.ico"))
-//            }
+            macOS {
+                iconFile.set(iconsRoot.resolve("icons8-64.ico"))
+            }
         }
     }
 }

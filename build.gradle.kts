@@ -18,22 +18,30 @@ version = "1.0-SNAPSHOT"
 val libraryPath = "third_party/java-cef"
 val hostOs = System.getProperty("os.name")
 println(hostOs)
+//val target = when {
+//    hostOs == "Mac OS X" -> "macos"
+//    hostOs == "Linux" -> "linux"
+//    hostOs.startsWith("Win") -> "windows"
+//    else -> throw Error("Unknown os $hostOs")
+//}
+
 val target = when {
     hostOs == "Mac OS X" -> "macos"
     hostOs == "Linux" -> "linux"
-    hostOs.startsWith("Win") -> "windows"
+    hostOs.startsWith("Win") -> "windows-amd64"
     else -> throw Error("Unknown os $hostOs")
 }
 
 
 val cefDownloadZip = run {
-    val zipName = "jcef-runtime-$target.zip"
+//    val zipName = "jcef-runtime-$target.zip"
+    val zipName = "$target.tar.gz"
     val zipFile = File("third_party/$zipName")
 
     tasks.register("downloadCef", Download::class) {
         onlyIf { !zipFile.exists() }
         // https://github.com/jcefmaven/jcefbuild/releases/download/1.0.61/windows-amd64.tar.gz
-        src("https://bintray.com/jetbrains/skija/download_file?file_path=$zipName")
+        src("https://github.com/jcefmaven/jcefbuild/releases/download/1.0.61/$zipName")
         dest(zipFile)
         onlyIfModified(true)
     }.map { zipFile }
